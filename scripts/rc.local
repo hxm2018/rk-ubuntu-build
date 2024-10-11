@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+sh /opt/probe/start.sh
+
+exit 0
