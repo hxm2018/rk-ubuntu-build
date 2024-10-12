@@ -217,6 +217,14 @@ EOF
 	fi
 }
 
+function write_yml_link_local() {
+	local yml=$1
+	local link_local=$2
+	cat >> $yml <<EOF
+      link-local: $link_local
+EOF
+}
+
 function create_netplan_config() {
 	local renderer=$1
 	local yml="/etc/netplan/00-default-config.yaml"
@@ -224,6 +232,7 @@ function create_netplan_config() {
 	local if_idx
 	local ips
 	local routes
+	local link_local
 
 	write_yml_head "$yml" "$renderer"
 	# networkd
@@ -234,15 +243,19 @@ function create_netplan_config() {
 			case $if_idx in
 				1) ips=$IF1_IPS
 				   routes=$IF1_ROUTES
+				   link_local=$IF1_LINK_LOCAL
 				   ;;
 				2) ips=$IF2_IPS
 				   routes=$IF2_ROUTES
+				   link_local=$IF2_LINK_LOCAL
 				   ;;
 				3) ips=$IF3_IPS
 				   routes=$IF3_ROUTES
+				   link_local=$IF3_LINK_LOCAL
 				   ;;
 				4) ips=$IF4_IPS
 				   routes=$IF4_ROUTES
+				   link_local=$IF4_LINK_LOCAL
 				   ;;
 				*) ips=""
 				   routes=""
@@ -253,11 +266,13 @@ function create_netplan_config() {
 			case $ips in
 				dhcp)	write_yml_ifname "$yml" "$1"
 					write_yml_dhcp "$yml" "true"
+					write_yml_link_local "$yml" "$link_local"
 					;;
 				  '')	echo "$1 do nothing";;
 				   *)	write_yml_ifname "$yml" "$1"
 					write_yml_dhcp "$yml" "false"
 					write_yml_ipaddr "$yml" "$ips"
+					write_yml_link_local "$yml" "$link_local"
 					# routes
 					if [ "$routes" != "" ];then
 						write_yml_routes "$yml" "$routes"
