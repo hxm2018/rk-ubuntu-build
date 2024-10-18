@@ -221,7 +221,7 @@ function write_yml_link_local() {
 	local yml=$1
 	local link_local=$2
 	cat >> $yml <<EOF
-      link-local: $link_local
+      link-local: []
 EOF
 }
 
@@ -534,6 +534,11 @@ function modify_user_pswd() {
 	sync
 }
 
+function lanac_log_snapshot() {
+	echo "59 23 * * * root /bin/bash /opt/probe/lanac_log_snapshot.sh" >> /etc/crontab
+	sync
+}
+
 fix_partition
 check_partition_count
 resize_partition
@@ -553,6 +558,7 @@ modify_user_pswd
 
 set_lightdm_default_xsession "xfce"
 enable_rknpu
+lanac_log_snapshot
 
 if [ -f /usr/lib/systemd/system/ssd1306.service ];then
 	enable_service ssd1306.service

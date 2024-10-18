@@ -122,6 +122,8 @@ cd ${rootpath}
 	ln -s uInitrd-${kernel_version} uInitrd && \
 	sed -e '/rootdev=/d' -i bootEnv.txt && \
 	echo "rootdev=UUID=${rootuuid}" >> bootEnv.txt && \
+	sed -e '/extraboardargs=/d' -i bootEnv.txt && \
+	echo "extraboardargs=net.ifnames=0" >> bootEnv.txt && \
 	mkdir -p dtb-${kernel_version}/rockchip && \
 	ln -s dtb-${kernel_version} dtb && \
 	cd dtb/rockchip && \
