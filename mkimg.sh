@@ -113,7 +113,7 @@ else
 fi
 echo "The target image size is ${target_img_mb} MB"
 
-output_img=${WORKDIR}/build/${machine_name}_${os_name}_${os_release}_v$(date +%Y%m%d).img
+output_img=${WORKDIR}/build/${soc}_${machine_name}_${os_name}_${os_release}_v$(date +%Y%m%d).img
 echo "Create a blank disk image: $output_img ... "
 echo ./scripts/diskinit.sh "${output_img}" "${target_img_mb}" "${bootloader_mb}" "${bootfs_mb}" "${rootfs_fstype}"
 ./scripts/diskinit.sh "${output_img}" "${target_img_mb}" "${bootloader_mb}" "${bootfs_mb}" "${rootfs_fstype}"

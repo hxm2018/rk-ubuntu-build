@@ -289,6 +289,7 @@ function create_netplan_config() {
 			let if_idx++
 		done
 	fi #networkd
+	chmod 600 $yml
 	echo 'done'
 	echo
 }
@@ -563,6 +564,11 @@ lanac_log_snapshot
 if [ -f /usr/lib/systemd/system/ssd1306.service ];then
 	enable_service ssd1306.service
 	start_service ssd1306.service
+fi
+
+if [ -f /usr/lib/systemd/system/chrony.service ];then
+	enable_service chrony.service
+	start_service chrony.service
 fi
 
 disable_service $FIRSTBOOT

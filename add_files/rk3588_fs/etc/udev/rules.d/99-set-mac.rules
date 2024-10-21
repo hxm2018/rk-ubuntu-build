@@ -1,0 +1,1 @@
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="e*", RUN+="/usr/local/bin/set_mac.sh %k"

@@ -122,8 +122,6 @@ cd ${rootpath}
 	ln -s uInitrd-${kernel_version} uInitrd && \
 	sed -e '/rootdev=/d' -i bootEnv.txt && \
 	echo "rootdev=UUID=${rootuuid}" >> bootEnv.txt && \
-	sed -e '/extraboardargs=/d' -i bootEnv.txt && \
-	echo "extraboardargs=net.ifnames=0" >> bootEnv.txt && \
 	mkdir -p dtb-${kernel_version}/rockchip && \
 	ln -s dtb-${kernel_version} dtb && \
 	cd dtb/rockchip && \
@@ -309,6 +307,11 @@ if [ -d "${btld_bin}" ];then
 elif [ -f "${btld_bin}" ];then
 	echo "dd if=${btld_bin} of=${loopdev} bs=512 skip=64 seek=64"
 	dd if=${btld_bin} of=${loopdev} bs=512 skip=64 seek=64
+else
+	echo "Can't found any bootloader!"
+	sync
+	losetup -D
+	exit 1
 fi
 echo "done"
 
