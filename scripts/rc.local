@@ -1,5 +1,5 @@
 #!/bin/sh -e
 
-sh /opt/probe/start.sh
-
+#sh /opt/probe/start.sh
+sh /opt/tindae-update/agent/bin/restart.sh
 exit 0
