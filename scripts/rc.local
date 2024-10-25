@@ -1,5 +1,5 @@
 #!/bin/sh -e
 
-#sh /opt/probe/start.sh
+echo `date +%F" "%T` "rc.local worked" >> /var/log/rc-local.log
 sh /opt/tindae-update/agent/bin/restart.sh
 exit 0

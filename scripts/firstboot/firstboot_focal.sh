@@ -77,6 +77,13 @@ function resize_filesystem() {
 	echo 
 }
 
+function daemon_reload() {
+	echo "systemctl daemon-reload ... "
+	systemctl daemon-reload
+	echo "done"
+	echo
+}
+
 function enable_service() {
 	echo "disable service $1 ... "
 	systemctl enable $1
@@ -94,6 +101,27 @@ function start_service() {
 function stop_service() {
 	echo "stop service $1 ... "
 	systemctl stop $1
+	echo "done"
+	echo
+}
+
+function status_service() {
+	echo "status of service $1 ... "
+	systemctl status $1
+	echo "done"
+	echo
+}
+
+function restart_service() {
+	echo "restart service $1 ... "
+	systemctl restart $1
+	echo "done"
+	echo
+}
+
+function restart_service() {
+	echo "start service $1 ... "
+	systemctl restart $1
 	echo "done"
 	echo
 }
@@ -294,6 +322,47 @@ function create_netplan_config() {
 	echo
 }
 
+function write_eth_config() {
+	local eth="$1$2"
+	case $2 in
+		eth0)
+			echo "$eth"
+			cat >> $eth <<EOF
+auto eth0
+iface eth0 inet static
+	address 0.0.0.0
+post-up sysctl -w net.ipv6.conf.eth0.disable_ipv6=1
+EOF
+		;;
+		eth1)
+			echo "$eth"
+			cat >> $eth <<EOF
+auto eth1
+iface eth1 inet static
+	address 192.168.8.8
+	netmask 255.255.255.0
+post-up sysctl -w net.ipv6.conf.eth1.disable_ipv6=1
+EOF
+		;;
+	esac
+
+}
+
+
+function creat_ifupdown_config() {
+	local path="/etc/network/interfaces.d/"	
+	echo "$1"
+	shift
+	echo "$1"
+	while [ "$1" != "" ];do
+		write_eth_config $path $1
+		shift
+		echo "$1"
+	done
+	echo 'done'
+	echo	
+}
+
 function config_network() {
 	local conf="/etc/firstboot_network.conf"
 	if [ -f $conf ];then
@@ -323,10 +392,11 @@ function config_network() {
 					netplan apply
 					;;
 			ifupdown*)	# ifupdown or ifupdown2
+					creat_ifupdown_config ${NETPLAN_BACKEND} $ifnames
 					stop_service systemd-networkd.service
 					disable_service systemd-networkd.service
 					enable_service networking.service
-					start_service networking.service
+					restart_service networking.service
 					;;
 		esac
 	fi
@@ -540,6 +610,31 @@ function lanac_log_snapshot() {
 	sync
 }
 
+function jdk_path() {
+	ln -s /usr/local/jdk1.8.0_361 /usr/local/jre
+	chmod +R 755 /usr/local/jre
+	local profile="/etc/profile"
+	local jre_home="/usr/local/jre"
+	cat >> $profile <<EOF
+ulimit -n 8192
+export JRE_HOME=/usr/local/jre
+export PATH=$jre_home/bin:\$PATH
+EOF
+	sync	
+}
+
+function write_yml_link_local() {
+	local yml=$1
+	local link_local=$2
+	cat >> $yml <<EOF
+      link-local: []
+EOF
+}
+
+function link_bash_sh() {
+	ln -sf /bin/bash /usr/bin/sh
+}
+
 fix_partition
 check_partition_count
 resize_partition
@@ -559,7 +654,8 @@ modify_user_pswd
 
 set_lightdm_default_xsession "xfce"
 enable_rknpu
-lanac_log_snapshot
+jdk_path
+link_bash_sh
 
 if [ -f /usr/lib/systemd/system/ssd1306.service ];then
 	enable_service ssd1306.service
@@ -569,6 +665,31 @@ fi
 if [ -f /usr/lib/systemd/system/chrony.service ];then
 	enable_service chrony.service
 	start_service chrony.service
+fi
+
+if [ -f usr/local/lib/systemd/system/rc-local.service ];then
+	systemd daemon-reload
+	enable_service rc-local.service
+	start_service rc-local.service
+	sleep 1
+	sleep 1
+	ret=$(systemctl status rc-local.service)
+	if [ $ret -ne 0 ];then
+	    stop_service rc-local.service
+	    start_service rc-local.service
+	fi
+fi
+
+if [ -f /usr/local/lib/systemd/system/mystartup.service ];then
+	systemd daemon-reload
+	enable_service mystartup.service
+	start_service mystartup.service
+	sleep 1
+	ret=$(systemctl status mystartup.service)
+	if [ $ret -ne 0 ];then
+	    stop_service mystartup.service
+	    start_service mystartup.service
+	fi
 fi
 
 disable_service $FIRSTBOOT
