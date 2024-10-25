@@ -235,7 +235,7 @@ EOF
 	mkdir -p usr/local/lib/systemd/system usr/local/bin
 	cp -v ${WORKDIR}/scripts/firstboot.service usr/local/lib/systemd/system/
 	cp -v ${WORKDIR}/scripts/mystartup.service usr/local/lib/systemd/system/
-	cp -v ${WORKDIR}/scripts/rc-local.service usr/local/lib/systemd/system/
+	cp -v ${WORKDIR}/scripts/rc-local.service etc/systemd/system/
 	cp -v ${firstboot} usr/local/bin/firstboot.sh && chmod 755 usr/local/bin/firstboot.sh
 	cp -v ${WORKDIR}/scripts/mystartup.sh usr/local/bin/mystartup.sh && chmod 755 usr/local/bin/mystartup.sh
 	cp -v ${WORKDIR}/scripts/rc.local etc/rc.local && chmod 755 etc/rc.local

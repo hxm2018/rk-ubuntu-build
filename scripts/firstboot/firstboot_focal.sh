@@ -635,6 +635,19 @@ function link_bash_sh() {
 	ln -sf /bin/bash /usr/bin/sh
 }
 
+function mkfs_xfs_disk() {
+        local disk_size
+        local disk_name
+        for file in `ls /dev/sd[a-z]`;do
+                disk_size=$(fdisk -l | grep "Disk /dev/sda" | grep -v GPT | cut -d " " -f 3-|cut -d "," -f 1|cut -d " " -f 1| awk '{print int($0)}')
+                if [ $disk_size -gt 0 ]; then
+                        disk_name=$file
+                        echo "$disk_name size $disk_size."
+                        mkfs.xfs -f $disk_name
+                fi
+        done
+}
+
 fix_partition
 check_partition_count
 resize_partition
@@ -656,6 +669,7 @@ set_lightdm_default_xsession "xfce"
 enable_rknpu
 jdk_path
 link_bash_sh
+mkfs_xfs_disk
 
 if [ -f /usr/lib/systemd/system/ssd1306.service ];then
 	enable_service ssd1306.service
@@ -667,29 +681,20 @@ if [ -f /usr/lib/systemd/system/chrony.service ];then
 	start_service chrony.service
 fi
 
-if [ -f usr/local/lib/systemd/system/rc-local.service ];then
+if [ -f /etc/systemd/system/rc-local.service ];then
 	systemd daemon-reload
 	enable_service rc-local.service
 	start_service rc-local.service
+	echo `date +%F" "%T` "run rc-local.service" >> /var/log/firstboot.log
 	sleep 1
-	sleep 1
+	restart_service rc-local.service
 	ret=$(systemctl status rc-local.service)
 	if [ $ret -ne 0 ];then
+		echo `date +%F" "%T` "restart rc-local.service" >> /var/log/firstboot.log
 	    stop_service rc-local.service
 	    start_service rc-local.service
 	fi
 fi
 
-if [ -f /usr/local/lib/systemd/system/mystartup.service ];then
-	systemd daemon-reload
-	enable_service mystartup.service
-	start_service mystartup.service
-	sleep 1
-	ret=$(systemctl status mystartup.service)
-	if [ $ret -ne 0 ];then
-	    stop_service mystartup.service
-	    start_service mystartup.service
-	fi
-fi
 
 disable_service $FIRSTBOOT
