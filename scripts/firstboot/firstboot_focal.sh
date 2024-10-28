@@ -268,7 +268,11 @@ function create_netplan_config() {
 					write_yml_dhcp "$yml" "true"
 					write_yml_link_local "$yml" "$link_local"
 					;;
-				  '')	echo "$1 do nothing";;
+				  '')	echo "$1 do nothing"
+				  	write_yml_ifname "$yml" "$1"
+					write_yml_dhcp "$yml" "false"
+					write_yml_link_local "$yml" "$link_local"
+					;;
 				   *)	write_yml_ifname "$yml" "$1"
 					write_yml_dhcp "$yml" "false"
 					write_yml_ipaddr "$yml" "$ips"
