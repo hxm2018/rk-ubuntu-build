@@ -512,6 +512,17 @@ function change_ssh_ciphers() {
 	fi
 }
 
+function  change_ssh_key_types () {
+	local key_type=$1
+	local conf=/etc/ssh/sshd_config
+	if [ "$key_type" != "" ];then
+		echo "Change sshd key type to $key_type"
+		sed -e '/^PubkeyAcceptedKeyTypes/d' -i $conf || echo "Change $conf failed! [$key_type]"
+		echo "PubkeyAcceptedKeyTypes=$key_type" | tee -a $conf
+		echo "done"
+	fi	
+}
+
 function config_openssh_server() {
 	local conf="/etc/firstboot_openssh.conf"
 	stop_service "ssh.service"
@@ -522,6 +533,7 @@ function config_openssh_server() {
 		change_sshd_ciphers "$SSHD_CIPHERS"
 		change_ssh_ciphers "$SSH_CIPHERS"
 		reset_sshd_key "$RESET_SSH_KEYS"
+		change_ssh_key_types "$PUBKEY_ACCEPTEDKEY_TYPES"
 		rm -f $conf
 	fi
 	enable_service "ssh.service"
