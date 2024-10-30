@@ -119,12 +119,6 @@ function restart_service() {
 	echo
 }
 
-function restart_service() {
-	echo "start service $1 ... "
-	systemctl restart $1
-	echo "done"
-	echo
-}
 
 function disable_service() {
 	echo "disable service $1 ... "
@@ -142,7 +136,7 @@ function setup_hostname() {
 		fi
 		rm -f $conf
 	fi
-	sync
+
 }
 
 function reset_machine_id() {
@@ -158,7 +152,7 @@ function reset_machine_id() {
 		fi
 		rm -f $conf
 	fi
-	sync
+
 }
 
 function get_ifnames() {
@@ -400,7 +394,7 @@ function config_network() {
 					;;
 		esac
 	fi
-	sync
+
 }
 
 function disable_suspend() {
@@ -538,7 +532,7 @@ function config_openssh_server() {
 	fi
 	enable_service "ssh.service"
 	start_service "ssh.service"
-	sync
+
 }
 
 function config_i18n() {
@@ -564,7 +558,7 @@ function config_i18n() {
 
 		rm -f $conf
 	fi
-	sync
+
 }
 
 function restart_getty() {
@@ -572,10 +566,8 @@ function restart_getty() {
 	while [ $i -le 12 ];do
 		local enabled=$(systemctl is-enabled getty@tty${i}.service)
 		if [ "$enabled" == "enabled" ];then
-			echo "stop getty@tty${i}.service"
-			stop_service "getty@tty${i}.service"
-			echo "start getty@tty${i}.service"
-			start_service "getty@tty${i}.service"
+			echo "restart getty@tty${i}.service"
+			restart_service "getty@tty${i}.service"
 		fi
 		let i++
 	done
@@ -614,15 +606,16 @@ function modify_user_pswd() {
 		rm -f ${file}
 		restart_getty
 	fi
-	sync
+
 }
 
 function lanac_log_snapshot() {
 	echo "59 23 * * * root /bin/bash /opt/probe/lanac_log_snapshot.sh" >> /etc/crontab
-	sync
+
 }
 
 function jdk_path() {
+	echo "config jdk path ...."
 	ln -s /usr/local/jdk1.8.0_361 /usr/local/jre
 	chmod +R 755 /usr/local/jre
 	local profile="/etc/profile"
@@ -632,7 +625,7 @@ ulimit -n 8192
 export JRE_HOME=/usr/local/jre
 export PATH=$jre_home/bin:\$PATH
 EOF
-	sync	
+	source $profile 
 }
 
 function write_yml_link_local() {
@@ -648,18 +641,29 @@ function link_bash_sh() {
 }
 
 function mkfs_xfs_disk() {
-        local disk_size
-        local disk_name
-        for file in `ls /dev/sd[a-z]`;do
-                disk_size=$(fdisk -l | grep "Disk /dev/sda" | grep -v GPT | cut -d " " -f 3-|cut -d "," -f 1|cut -d " " -f 1| awk '{print int($0)}')
-                if [ $disk_size -gt 0 ]; then
-                        disk_name=$file
-                        echo "$disk_name size $disk_size."
-                        mkfs.xfs -f $disk_name
-                fi
-        done
+	local disk_size
+	for file in `ls /dev/sd[a-z]`;do
+			disk_size=$(fdisk -l | grep "Disk /dev/sda" | grep -v GPT | cut -d " " -f 3-|cut -d "," -f 1|cut -d " " -f 1| awk '{print int($0)}')
+			if [ $disk_size -gt 0 ]; then
+				for file in `ls /dev/sd[a-z]`;do
+						umount $file > /dev/null 2>&1
+						for num in `parted $file print | grep -E '^\s+[0-9]+' | awk '{print $1}'`;do
+								umount $file$num > /dev/null 2>&1
+								parted $file rm $num
+								echo "rm" $file$num
+						done
+
+						sleep 1
+						echo "mkfs.xfs "$file "......"  
+						parted -s $file mklabel gpt
+						parted -s $file mkpart primary xfs 0% 100%
+						mkfs.xfs -f $file'1'
+				done
+			fi
+	done
 }
 
+mkfs_xfs_disk
 fix_partition
 check_partition_count
 resize_partition
@@ -681,7 +685,7 @@ set_lightdm_default_xsession "xfce"
 enable_rknpu
 jdk_path
 link_bash_sh
-mkfs_xfs_disk
+
 
 if [ -f /usr/lib/systemd/system/ssd1306.service ];then
 	enable_service ssd1306.service
@@ -693,7 +697,7 @@ if [ -f /usr/lib/systemd/system/chrony.service ];then
 	start_service chrony.service
 fi
 
-if [ -f /etc/systemd/system/rc-local.service ];then
+if [ -f /usr/local/lib/systemd/system/rc-local.service ];then
 	systemd daemon-reload
 	enable_service rc-local.service
 	start_service rc-local.service
@@ -701,12 +705,13 @@ if [ -f /etc/systemd/system/rc-local.service ];then
 	sleep 1
 	restart_service rc-local.service
 	ret=$(systemctl status rc-local.service)
-	if [ $ret -ne 0 ];then
+	if [ "$ret"=="" ];then
 		echo `date +%F" "%T` "restart rc-local.service" >> /var/log/firstboot.log
 	    stop_service rc-local.service
 	    start_service rc-local.service
 	fi
 fi
 
+sync
 
 disable_service $FIRSTBOOT

@@ -37,7 +37,7 @@ if [ $DATA_DRIVER_EXIST = "yes" ]; then
     fi
 
 
-    MDISK=$DATA_DRIVER
+    MDISK=$DATA_DRIVER"1"
     if [ -b $MDISK ];then
        echo "Mounting Data Driver: $MDISK"
        xfs_repair -L $MDISK
