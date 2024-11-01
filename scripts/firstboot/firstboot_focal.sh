@@ -604,7 +604,7 @@ function modify_user_pswd() {
 			fi
 		done
 		rm -f ${file}
-		restart_getty
+		#restart_getty
 	fi
 
 }
@@ -653,7 +653,7 @@ function mkfs_xfs_disk() {
 								echo "rm" $file$num
 						done
 
-						sleep 1
+						sleep 2
 						echo "mkfs.xfs "$file "......"  
 						parted -s $file mklabel gpt
 						parted -s $file mkpart primary xfs 0% 100%
@@ -663,11 +663,11 @@ function mkfs_xfs_disk() {
 	done
 }
 
-mkfs_xfs_disk
 fix_partition
 check_partition_count
 resize_partition
 resize_filesystem
+sleep 5
 
 setup_hostname
 reset_machine_id
@@ -684,8 +684,9 @@ modify_user_pswd
 set_lightdm_default_xsession "xfce"
 enable_rknpu
 jdk_path
+mkfs_xfs_disk
 link_bash_sh
-
+sleep 1
 
 if [ -f /usr/lib/systemd/system/ssd1306.service ];then
 	enable_service ssd1306.service
@@ -703,9 +704,9 @@ if [ -f /usr/local/lib/systemd/system/rc-local.service ];then
 	start_service rc-local.service
 	echo `date +%F" "%T` "run rc-local.service" >> /var/log/firstboot.log
 	sleep 1
-	restart_service rc-local.service
-	ret=$(systemctl status rc-local.service)
-	if [ "$ret"=="" ];then
+	#restart_service rc-local.service
+	systemctl status rc-local.service
+	if [ $? -ne 0 ];then
 		echo `date +%F" "%T` "restart rc-local.service" >> /var/log/firstboot.log
 	    stop_service rc-local.service
 	    start_service rc-local.service

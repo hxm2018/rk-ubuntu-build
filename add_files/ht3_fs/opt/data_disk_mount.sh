@@ -32,19 +32,25 @@ fi
 DATA_DRIVER=$DISK_SIZE_MAX_NAME;
 
 if [ $DATA_DRIVER_EXIST = "yes" ]; then
-    if [ ! -d /data ];then
-       mkdir /data
-    fi
+   if [ ! -d /data ];then
+      mkdir /data
+   fi
 
+   sync
+   sleep 1
 
-    MDISK=$DATA_DRIVER"1"
-    if [ -b $MDISK ];then
-       echo "Mounting Data Driver: $MDISK"
-       xfs_repair -L $MDISK
-       mount -t xfs $MDISK /data
-    else
-       echo "Disk block not exist"$MDISK
+   if [ ! -d /data ];then
+      echo "no /data"
+   fi 
+
+   MDISK=$DATA_DRIVER"1"
+   if [ -b $MDISK ];then
+      echo "Mounting Data Driver: $MDISK"
+      xfs_repair -L $MDISK
+      mount -t xfs $MDISK /data
+   else
+      echo "Disk block not exist"$MDISK
        
-    fi
+   fi
 fi
 

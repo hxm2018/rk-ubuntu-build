@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 echo `date +%F" "%T` "rc.local worked" >> /var/log/rc-local.log
 sh /opt/data_disk_mount.sh
+sleep 1
 sh /opt/tindae-update/agent/bin/restart.sh
 exit 0
