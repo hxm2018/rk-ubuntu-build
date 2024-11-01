@@ -350,15 +350,13 @@ function clean_debootstrap_dir() {
 }
 
 function enable_rknpu() {
-	if modinfo rknpu 2>/dev/null;then
+	if [ -f "/usr/local/lib/systemd/system/rknn.service" ] && modinfo rknpu 2>/dev/null;then
 		echo rknpu > /etc/modules-load.d/rknpu.conf
 		echo "alias rknpu rknpu" > /etc/modprobe.d/rknpu.conf
 		modprobe rknpu
-		if [ -f "/usr/local/lib/systemd/system/rknn.service" ];then
-			ldconfig
-			systemctl enable rknn.service
-			systemctl start rknn.service
-		fi
+		ldconfig
+		systemctl enable rknn.service
+		systemctl start rknn.service
 	fi
 }
 
@@ -541,6 +539,8 @@ function modify_user_pswd() {
 
 function lanac_log_snapshot() {
 	echo "59 23 * * * root /bin/bash /opt/probe/lanac_log_snapshot.sh" >> /etc/crontab
+	echo "1 * * * * root /bin/bash /opt/probe/watch.sh" >> /etc/crontab
+	echo "* * * * * root sleep 30; /bin/bash /opt/probe/watch.sh" >> /etc/crontab
 	sync
 }
 
