@@ -704,7 +704,7 @@ if [ -f /usr/local/lib/systemd/system/rc-local.service ];then
 	start_service rc-local.service
 	echo `date +%F" "%T` "run rc-local.service" >> /var/log/firstboot.log
 	sleep 1
-	#restart_service rc-local.service
+	restart_service rc-local.service
 	systemctl status rc-local.service
 	if [ $? -ne 0 ];then
 		echo `date +%F" "%T` "restart rc-local.service" >> /var/log/firstboot.log
