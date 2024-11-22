@@ -539,8 +539,8 @@ function modify_user_pswd() {
 
 function lanac_log_snapshot() {
 	echo "59 23 * * * root /bin/bash /opt/probe/lanac_log_snapshot.sh" >> /etc/crontab
-	echo "1 * * * * root /bin/bash /opt/probe/watch.sh" >> /etc/crontab
-	echo "* * * * * root sleep 30; /bin/bash /opt/probe/watch.sh" >> /etc/crontab
+#	echo "1 * * * * root /bin/bash /opt/probe/watch.sh" >> /etc/crontab
+#	echo "* * * * * root sleep 30; /bin/bash /opt/probe/watch.sh" >> /etc/crontab
 	sync
 }
 
