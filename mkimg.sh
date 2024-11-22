@@ -108,7 +108,7 @@ if [ "$rootfs_fstype" == "btrfs" ];then
 	target_img_mb=$(echo -e "(($rootfs_source_mb + $modules_mb) * $compress_rate + $bootloader_mb + $bootfs_mb) / 1\nquit\n" | ${BC} -q)
 else
 	# reserved size for xfs or ext4
-	reserved_mb=512
+	reserved_mb=1024
 	target_img_mb=$(( $rootfs_source_mb + $modules_mb + $bootloader_mb + $bootfs_mb + $reserved_mb))
 fi
 echo "The target image size is ${target_img_mb} MB"
