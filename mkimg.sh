@@ -112,9 +112,9 @@ else
 	target_img_mb=$(( $rootfs_source_mb + $modules_mb + $bootloader_mb + $bootfs_mb + $reserved_mb))
 fi
 echo "The target image size is ${target_img_mb} MB"
-
-output_img=${WORKDIR}/build/TM${os_name}_${soc}_${machine_name}_v$(date +%Y%m%d)-mini.img
-echo "TM${os_name}_${soc}_${machine_name}_v$(date +%Y%m%d)-mini" > ${WORKDIR}/build/${rootfs_source}/var/log/img_version
+count=$(./counter.sh)
+output_img=${WORKDIR}/build/TM${os_name}_${soc}_${machine_name}_v$(date +%Y%m%d)-mini-$count.img
+echo "TM${os_name}_${soc}_${machine_name}_v$(date +%Y%m%d)-mini-$count" > ${WORKDIR}/build/${rootfs_source}/var/log/img_version
 echo "Create a blank disk image: $output_img ... "
 echo ./scripts/diskinit.sh "${output_img}" "${target_img_mb}" "${bootloader_mb}" "${bootfs_mb}" "${rootfs_fstype}"
 ./scripts/diskinit.sh "${output_img}" "${target_img_mb}" "${bootloader_mb}" "${bootfs_mb}" "${rootfs_fstype}"

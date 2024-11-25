@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 文件用于存储计数器和日期
-DATA_FILE="counter_data.txt"
+DATA_FILE="counter_data"
 #echo $DATA_FILE
 # 获取当前日期
 current_date=$(date +%Y-%m-%d)
@@ -25,5 +25,6 @@ fi
 # 更新数据文件
 echo "$count $current_date" > "$DATA_FILE"
 
+echo $count
 # 输出当前计数
-echo "当前日期: $current_date, 累加计数: $count"
+#echo "当前日期: $current_date, 累加计数: $count"
