@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+/opt/wdog/watchdog -d
 sh /opt/probe/start.sh
+
 
 exit 0
