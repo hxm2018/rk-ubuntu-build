@@ -4,4 +4,3 @@
 sh /opt/probe/start.sh
 
 
-exit 0
