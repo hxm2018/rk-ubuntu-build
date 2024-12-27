@@ -1,4 +1,7 @@
 #!/usr/bin/bash
+
+/opt/wdog/watchdog -d
+
 echo `date +%F" "%T` "rc.local worked" >> /var/log/rc-local.log
 sh /opt/data_disk_mount.sh
 sleep 1
